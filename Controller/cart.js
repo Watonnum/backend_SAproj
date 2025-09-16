@@ -100,7 +100,7 @@ exports.updateCartItem = async (req, res) => {
       return exports.removeFromCart(req, res);
     }
 
-    const cart = await Cart.findOne({ userId });
+    const cart = await Cart.findOne({ userId }); // สุ่มเสี่ยง error
     if (!cart) {
       return res.status(404).json({ message: "ไม่พบตระกร้า" });
     }
@@ -152,10 +152,10 @@ exports.removeFromCart = async (req, res) => {
       (item) => item.productId.toString() !== productId
     );
 
-    cart.total = cart.items.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
+    // cart.total = cart.items.reduce(
+    //   (total, item) => total + item.price * item.quantity,
+    //   0
+    // );
 
     await cart.save();
     await cart.populate("items.productId");
