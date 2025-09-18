@@ -35,11 +35,9 @@ const productSchema = mongoose.Schema(
     expiration_date: {
       product_manufacture: {
         type: Date,
-        required: false,
       },
       product_expire: {
         type: Date,
-        required: false,
       },
     },
     stock: {

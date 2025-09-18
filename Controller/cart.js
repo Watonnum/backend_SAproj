@@ -5,9 +5,14 @@ const Product = require("../Model/product");
 exports.addToCart = async (req, res) => {
   try {
     const { productId, quantity = 1, userId = "guest" } = req.body;
-
+    console.log(
+      "productId : " + productId + "\n",
+      "qty : " + quantity + "\n",
+      "userId : " + userId + "\n\n\n"
+    );
     // ตรวจสอบสินค้าว่ามีอยู่หรือไม่
     const product = await Product.findById(productId);
+    console.log("Product : " + product);
     if (!product) {
       return res.status(404).json({ message: "ไม่พบสินค้า" });
     }
@@ -19,6 +24,7 @@ exports.addToCart = async (req, res) => {
 
     // ค้นหาตระกร้าของผู้ใช้
     let cart = await Cart.findOne({ userId });
+    console.log("\n\n\n\n" + cart);
 
     if (!cart) {
       // สร้างตระกร้าใหม่
@@ -29,6 +35,8 @@ exports.addToCart = async (req, res) => {
             productId,
             quantity,
             price: product.price,
+            name: product.name,
+            category: product.category,
           },
         ],
         total: product.price * quantity,
@@ -48,6 +56,8 @@ exports.addToCart = async (req, res) => {
           productId,
           quantity,
           price: product.price,
+          name: product.name,
+          category: product.category,
         });
       }
 
@@ -57,6 +67,8 @@ exports.addToCart = async (req, res) => {
         0
       );
     }
+
+    console.log(cart);
 
     await cart.save();
     await cart.populate("items.productId");
