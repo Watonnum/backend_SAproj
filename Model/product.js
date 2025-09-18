@@ -35,11 +35,11 @@ const productSchema = mongoose.Schema(
     expiration_date: {
       product_manufacture: {
         type: Date,
-        required: true,
+        required: false,
       },
       product_expire: {
         type: Date,
-        required: true,
+        required: false,
       },
     },
     stock: {
@@ -49,8 +49,8 @@ const productSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["available", "unavailable"],
-      default: "available",
+      enum: ["active", "inactive"],
+      default: "active",
     },
   },
   { timestamps: true }

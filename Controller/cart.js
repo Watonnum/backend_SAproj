@@ -61,10 +61,7 @@ exports.addToCart = async (req, res) => {
     await cart.save();
     await cart.populate("items.productId");
 
-    res.status(200).json({
-      message: "เพิ่มสินค้าเข้าตระกร้าแล้ว",
-      cart,
-    });
+    res.status(200).json(cart, { message: "เพิ่มสินค้าเรียบร้อยแล้ว" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Cart ADD error" });
@@ -80,11 +77,11 @@ exports.getCart = async (req, res) => {
 
     if (!cart) {
       return res.status(200).json({
-        cart: { items: [], total: 0 },
+        cart: { userId, items: [], total: 0 },
       });
     }
 
-    res.status(200).json({ cart });
+    res.status(200).json(cart);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Cart GET error" });
@@ -128,9 +125,8 @@ exports.updateCartItem = async (req, res) => {
     await cart.save();
     await cart.populate("items.productId");
 
-    res.status(200).json({
+    res.status(200).json(cart, {
       message: "อัพเดทตระกร้าแล้ว",
-      cart,
     });
   } catch (error) {
     console.log(error);
@@ -160,9 +156,8 @@ exports.removeFromCart = async (req, res) => {
     await cart.save();
     await cart.populate("items.productId");
 
-    res.status(200).json({
+    res.status(200).json(cart, {
       message: "ลบสินค้าออกจากตระกร้าแล้ว",
-      cart,
     });
   } catch (error) {
     console.log(error);
