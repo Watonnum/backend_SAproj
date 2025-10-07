@@ -1,4 +1,14 @@
-const model_Product = require("../Model/product");
+const model_Product = require("../Model/products");
+
+exports.list = async (req, res) => {
+  try {
+    const producted = await model_Product.find({}).exec(); //remember -> ".find({}).exec()"
+    res.send(producted);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Get error");
+  }
+};
 
 exports.getID = async (req, res) => {
   try {
@@ -11,19 +21,8 @@ exports.getID = async (req, res) => {
   }
 };
 
-exports.list = async (req, res) => {
-  try {
-    const producted = await model_Product.find({}).exec(); //remember -> ".find({}).exec()"
-    res.send(producted);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send("Get error");
-  }
-};
-
 exports.create = async (req, res) => {
   try {
-    console.log(req.body);
     const producted = await model_Product(req.body).save(); // remember -> ".save()" to save in DB
     res.send(producted);
   } catch (error) {

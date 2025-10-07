@@ -1,5 +1,5 @@
 const Cart = require("../Model/cart");
-const Product = require("../Model/product");
+const Product = require("../Model/products");
 
 // เพิ่มสินค้าเข้าตระกร้า
 exports.addToCart = async (req, res) => {

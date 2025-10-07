@@ -4,7 +4,7 @@ require("dotenv").config();
 const connectDB = async () => {
   try {
     await mongoose.connect(
-      `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@airbnb.rtqc7ov.mongodb.net/`
+      `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@ecom.wgcuusc.mongodb.net/eCom`
     );
     console.log("DB connectedd");
   } catch (error) {
