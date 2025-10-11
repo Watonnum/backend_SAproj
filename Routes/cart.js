@@ -6,6 +6,7 @@ const {
   updateCartItem,
   removeFromCart,
   clearCart,
+  getAllCart,
 } = require("../Controller/cart");
 
 // เพิ่มสินค้าเข้าตระกร้า
@@ -13,6 +14,8 @@ router.post("/cart/add", addToCart);
 
 // ดูตระกร้าสินค้า
 router.get("/cart/:userId", getCart);
+
+router.get("/cart", getAllCart);
 
 // อัพเดทจำนวนสินค้า
 router.put("/cart/update", updateCartItem);

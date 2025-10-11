@@ -48,7 +48,7 @@ exports.updateUsers = async (req, res) => {
 exports.removeUsers = async (req, res) => {
   try {
     const id = req.params.id;
-    const removed = await model_Categories.findOneAndDelete().exec();
+    const removed = await model_Users.findOneAndDelete({ _id: id }).exec();
     res.send(removed);
   } catch (error) {
     console.log(error);

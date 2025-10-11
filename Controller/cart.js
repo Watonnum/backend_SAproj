@@ -100,6 +100,16 @@ exports.getCart = async (req, res) => {
   }
 };
 
+exports.getAllCart = async (req, res) => {
+  try {
+    const cart = await Cart.find({}).exec();
+    res.status(200).send(cart);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("get all cart");
+  }
+};
+
 // อัพเดทจำนวนสินค้าในตระกร้า
 exports.updateCartItem = async (req, res) => {
   try {
