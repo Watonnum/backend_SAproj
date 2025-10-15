@@ -2,7 +2,11 @@ const model_Product = require("../Model/products");
 
 exports.list = async (req, res) => {
   try {
-    const producted = await model_Product.find({}).exec(); //remember -> ".find({}).exec()"
+    // Populate category information for better frontend display
+    const producted = await model_Product
+      .find({})
+      .populate("categoryId", "name description")
+      .exec();
     res.send(producted);
   } catch (error) {
     console.log(error);
@@ -13,7 +17,10 @@ exports.list = async (req, res) => {
 exports.getID = async (req, res) => {
   try {
     const id = req.params.id;
-    const producted = await model_Product.findOne({ _id: id });
+    const producted = await model_Product
+      .findOne({ _id: id })
+      .populate("categoryId", "name description")
+      .exec();
     res.send(producted);
   } catch (error) {
     console.log(error);
