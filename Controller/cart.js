@@ -4,7 +4,7 @@ const Product = require("../Model/products");
 // เพิ่มสินค้าเข้าตระกร้า
 exports.addToCart = async (req, res) => {
   try {
-    const { productId, quantity = 1, userId = "guest" } = req.body;
+    const { productId, quantity = 1, userId = "" } = req.body;
     console.log(
       "productId : " + productId + "\n",
       "qty : " + quantity + "\n",
@@ -71,7 +71,7 @@ exports.addToCart = async (req, res) => {
     console.log(cart);
 
     await cart.save();
-    await cart.populate("items.productId");
+    await cart.populate("productId");
 
     res.status(200).json(cart, { message: "เพิ่มสินค้าเรียบร้อยแล้ว" });
   } catch (error) {
