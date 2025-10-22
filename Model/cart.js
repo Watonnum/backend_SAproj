@@ -3,15 +3,15 @@ const mongoose = require("mongoose");
 const cartSchema = mongoose.Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId || "guest",
-      ref: "users", // อ้างอิงไปยัง User model
+      type: String, // เปลี่ยนเป็น String เพื่อรองรับทั้ง ObjectId และ "guest"
       required: true,
+      default: "guest",
     },
     items: [
       {
         productId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "products", // อ้างอิงไปยัง Product model
+          ref: "products", // ตรวจสอบว่า Product model ใช้ชื่อ "products" หรือ "Product"
           required: true,
         },
         productName: {
@@ -29,7 +29,7 @@ const cartSchema = mongoose.Schema(
         },
         subtotal: {
           type: Number,
-          required: false,
+          required: true, // เปลี่ยนเป็น required: true
         },
         addedAt: {
           type: Date,
@@ -39,12 +39,12 @@ const cartSchema = mongoose.Schema(
     ],
     totalAmount: {
       type: Number,
-      required: false,
+      required: true, // เปลี่ยนเป็น required: true
       default: 0,
     },
     totalItems: {
       type: Number,
-      required: false,
+      required: true, // เปลี่ยนเป็น required: true
       default: 0,
     },
     status: {
@@ -74,5 +74,11 @@ const cartSchema = mongoose.Schema(
 cartSchema.index({ userId: 1 });
 cartSchema.index({ sessionId: 1 });
 cartSchema.index({ status: 1 });
+
+// Pre-save middleware เพื่ออัพเดท updatedAt
+cartSchema.pre("save", function (next) {
+  this.updatedAt = new Date();
+  next();
+});
 
 module.exports = mongoose.model("Cart", cartSchema);

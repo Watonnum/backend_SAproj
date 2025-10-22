@@ -4,12 +4,18 @@ const Product = require("../Model/products");
 // เพิ่มสินค้าเข้าตระกร้า
 exports.addToCart = async (req, res) => {
   try {
-    const { productId, quantity = 1, userId = "" } = req.body;
+    const { productId, quantity = 1, userId = "guest" } = req.body; // เปลี่ยน default userId เป็น "guest"
     console.log(
       "productId : " + productId + "\n",
       "qty : " + quantity + "\n",
       "userId : " + userId + "\n\n\n"
     );
+
+    // ตรวจสอบว่ามี productId หรือไม่
+    if (!productId) {
+      return res.status(400).json({ message: "ไม่พบ Product ID" });
+    }
+
     // ตรวจสอบสินค้าว่ามีอยู่หรือไม่
     const product = await Product.findById(productId);
     console.log("Product : " + product);
@@ -17,8 +23,8 @@ exports.addToCart = async (req, res) => {
       return res.status(404).json({ message: "ไม่พบสินค้า" });
     }
 
-    // ตรวจสอบ stock
-    if (product.stock < quantity) {
+    // ตรวจสอบ stock (ใช้ inStock แทน stock)
+    if (product.inStock < quantity) {
       return res.status(400).json({ message: "สินค้าไม่เพียงพอ" });
     }
 
@@ -33,50 +39,68 @@ exports.addToCart = async (req, res) => {
         items: [
           {
             productId,
-            quantity,
+            productName: product.name,
             price: product.price,
-            name: product.name,
-            category: product.category,
+            quantity,
+            subtotal: product.price * quantity,
           },
         ],
-        total: product.price * quantity,
+        totalAmount: product.price * quantity,
+        totalItems: quantity,
       });
     } else {
       // ตรวจสอบว่าสินค้านี้มีในตระกร้าแล้วหรือไม่
-      const existingItem = cart.items.find(
+      const existingItemIndex = cart.items.findIndex(
         (item) => item.productId.toString() === productId
       );
 
-      if (existingItem) {
+      if (existingItemIndex > -1) {
         // อัพเดทจำนวน
-        existingItem.quantity += quantity;
+        cart.items[existingItemIndex].quantity += quantity;
+        cart.items[existingItemIndex].subtotal =
+          cart.items[existingItemIndex].price *
+          cart.items[existingItemIndex].quantity;
       } else {
         // เพิ่มสินค้าใหม่
         cart.items.push({
           productId,
-          quantity,
+          productName: product.name,
           price: product.price,
-          name: product.name,
-          category: product.category,
+          quantity,
+          subtotal: product.price * quantity,
         });
       }
 
       // คำนวณราคารวมใหม่
-      cart.total = cart.items.reduce(
-        (total, item) => total + item.price * item.quantity,
+      cart.totalAmount = cart.items.reduce(
+        (total, item) => total + item.subtotal,
+        0
+      );
+      cart.totalItems = cart.items.reduce(
+        (total, item) => total + item.quantity,
         0
       );
     }
 
-    console.log(cart);
+    console.log("Cart to save:", cart);
 
     await cart.save();
-    await cart.populate("productId");
 
-    res.status(200).json(cart, { message: "เพิ่มสินค้าเรียบร้อยแล้ว" });
+    // Populate ข้อมูลสินค้า
+    await cart.populate("items.productId");
+
+    res.status(200).json({
+      success: true,
+      message: "เพิ่มสินค้าเรียบร้อยแล้ว",
+      cart: cart,
+    });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Cart ADD error" });
+    console.error("Add to cart error:", error);
+    res.status(500).json({
+      success: false,
+      message: "เกิดข้อผิดพลาดในการเพิ่มสินค้า",
+      error: error.message,
+    });
   }
 };
 
@@ -89,7 +113,10 @@ exports.getCart = async (req, res) => {
 
     if (!cart) {
       return res.status(200).json({
-        cart: { userId, items: [], total: 0 },
+        userId,
+        items: [],
+        totalAmount: 0,
+        totalItems: 0,
       });
     }
 
