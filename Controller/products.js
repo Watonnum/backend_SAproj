@@ -41,9 +41,17 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const id = req.params.id;
+
+    // Log เพื่อ debug
+    console.log("Update product ID:", id);
+    console.log("Update data:", req.body);
+
     const updated = await model_Product
       .findOneAndUpdate({ _id: id }, req.body, { new: true })
+      .populate("categoryId", "name description")
       .exec();
+
+    console.log("Updated product:", updated);
     res.send(updated);
   } catch (error) {
     console.log(error);
