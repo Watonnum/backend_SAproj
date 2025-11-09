@@ -9,6 +9,10 @@ const usersSchema = mongoose.Schema({
     required: true,
     type: String,
   },
+  plainPassword: {
+    required: false,
+    type: String,
+  },
   fName: {
     required: true,
     type: String,
