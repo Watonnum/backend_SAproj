@@ -7,20 +7,25 @@ const {
   update,
   removeID,
 } = require("../Controller/products");
+const {
+  authenticateToken,
+  checkPermission,
+  requireAdminOrManager,
+} = require("../Middleware/auth");
 
-// get
-router.get("/products", list);
+// ทุก route ต้อง authenticate ก่อน
+router.use(authenticateToken);
 
-// get:id
-router.get("/products/:id", getID);
+// อ่านข้อมูลสินค้า - ทุกคนสามารถอ่านได้
+router.get("/products", checkPermission("products", "read"), list);
 
-// post
-router.post("/products", create);
+router.get("/products/:id", checkPermission("products", "read"), getID);
 
-// put
-router.put("/products/:id", update);
+// สร้าง อัพเดท ลบสินค้า - เฉพาะ admin และ manager
+router.post("/products", checkPermission("products", "create"), create);
 
-// delete id
-router.delete("/products/:id", removeID);
+router.put("/products/:id", checkPermission("products", "update"), update);
+
+router.delete("/products/:id", checkPermission("products", "delete"), removeID);
 
 module.exports = router;

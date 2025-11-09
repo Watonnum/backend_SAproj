@@ -7,15 +7,45 @@ const {
   updateCategories,
   removeCategories,
 } = require("../Controller/categories");
+const {
+  authenticateToken,
+  checkPermission,
+  requireAdminOrManager,
+} = require("../Middleware/auth");
 
-router.get("/categories/", getAllCategories);
+// ทุก route ต้อง authenticate ก่อน
+router.use(authenticateToken);
 
-router.get("/categories/:id", getCategories);
+// อ่านข้อมูล categories - ทุกคนสามารถอ่านได้
+router.get(
+  "/categories/",
+  checkPermission("categories", "read"),
+  getAllCategories
+);
 
-router.post("/categories", createCategories);
+router.get(
+  "/categories/:id",
+  checkPermission("categories", "read"),
+  getCategories
+);
 
-router.put("/categories/:id", updateCategories);
+// สร้าง อัพเดท ลบ categories - เฉพาะ admin และ manager
+router.post(
+  "/categories",
+  checkPermission("categories", "create"),
+  createCategories
+);
 
-router.delete("/categories/:id", removeCategories);
+router.put(
+  "/categories/:id",
+  checkPermission("categories", "update"),
+  updateCategories
+);
+
+router.delete(
+  "/categories/:id",
+  checkPermission("categories", "delete"),
+  removeCategories
+);
 
 module.exports = router;

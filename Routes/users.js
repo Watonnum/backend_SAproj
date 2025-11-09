@@ -7,15 +7,24 @@ const {
   removeUsers,
   updateUsers,
 } = require("../Controller/users");
+const {
+  authenticateToken,
+  checkPermission,
+  requireAdmin,
+} = require("../Middleware/auth");
 
-router.get("/users", getUsers);
+// ทุก route ต้อง authenticate ก่อน
+router.use(authenticateToken);
 
-router.get("/users/:id", getUsersId);
+// เฉพาะ admin เท่านั้นที่จัดการ users ได้
+router.get("/users", requireAdmin, getUsers);
 
-router.post("/users", createUsers);
+router.get("/users/:id", requireAdmin, getUsersId);
 
-router.put("/users/:id", updateUsers);
+router.post("/users", requireAdmin, createUsers);
 
-router.delete("/users/:id", removeUsers);
+router.put("/users/:id", requireAdmin, updateUsers);
+
+router.delete("/users/:id", requireAdmin, removeUsers);
 
 module.exports = router;

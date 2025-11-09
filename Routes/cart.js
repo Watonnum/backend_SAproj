@@ -8,22 +8,30 @@ const {
   clearCart,
   getAllCart,
 } = require("../Controller/cart");
+const { authenticateToken, checkPermission } = require("../Middleware/auth");
 
-// เพิ่มสินค้าเข้าตระกร้า
-router.post("/cart/add", addToCart);
+// ทุก route ต้อง authenticate ก่อน
+router.use(authenticateToken);
 
-// ดูตระกร้าสินค้า
-router.get("/cart/:userId", getCart);
+// จัดการตระกร้าสินค้า - ทุกคนสามารถใช้ได้
+router.post("/cart/add", checkPermission("cart", "create"), addToCart);
 
-router.get("/cart", getAllCart);
+router.get("/cart/:userId", checkPermission("cart", "read"), getCart);
 
-// อัพเดทจำนวนสินค้า
-router.put("/cart/update", updateCartItem);
+router.get("/cart", checkPermission("cart", "read"), getAllCart);
 
-// ลบสินค้าออกจากตระกร้า
-router.delete("/cart/remove", removeFromCart);
+router.put("/cart/update", checkPermission("cart", "update"), updateCartItem);
 
-// ล้างตระกร้า
-router.delete("/cart/clear/:userId", clearCart);
+router.delete(
+  "/cart/remove",
+  checkPermission("cart", "delete"),
+  removeFromCart
+);
+
+router.delete(
+  "/cart/clear/:userId",
+  checkPermission("cart", "delete"),
+  clearCart
+);
 
 module.exports = router;

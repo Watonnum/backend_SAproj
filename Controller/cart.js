@@ -4,12 +4,17 @@ const Product = require("../Model/products");
 // เพิ่มสินค้าเข้าตระกร้า
 exports.addToCart = async (req, res) => {
   try {
-    const { productId, quantity = 1, userId = "guest" } = req.body; // เปลี่ยน default userId เป็น "guest"
+    const { productId, quantity = 1, userId } = req.body;
     console.log(
       "productId : " + productId + "\n",
       "qty : " + quantity + "\n",
       "userId : " + userId + "\n\n\n"
     );
+
+    // ตรวจสอบว่ามี userId หรือไม่
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
 
     // ตรวจสอบว่ามี productId หรือไม่
     if (!productId) {
@@ -111,7 +116,12 @@ exports.addToCart = async (req, res) => {
 // ดูตระกร้าสินค้า
 exports.getCart = async (req, res) => {
   try {
-    const userId = req.params.userId || "guest";
+    const userId = req.params.userId;
+
+    // ตรวจสอบว่ามี userId หรือไม่
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
 
     const cart = await Cart.findOne({ userId }).populate("items.productId");
 
@@ -144,7 +154,12 @@ exports.getAllCart = async (req, res) => {
 // อัพเดทจำนวนสินค้าในตระกร้า
 exports.updateCartItem = async (req, res) => {
   try {
-    const { userId = "guest", productId, quantity } = req.body;
+    const { userId, productId, quantity } = req.body;
+
+    // ตรวจสอบว่ามี userId หรือไม่
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
 
     if (quantity <= 0) {
       return exports.removeFromCart(req, res);
@@ -199,7 +214,12 @@ exports.updateCartItem = async (req, res) => {
 // ลบสินค้าออกจากตระกร้า
 exports.removeFromCart = async (req, res) => {
   try {
-    const { userId = "guest", productId } = req.body;
+    const { userId, productId } = req.body;
+
+    // ตรวจสอบว่ามี userId หรือไม่
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
 
     const cart = await Cart.findOne({ userId });
     if (!cart) {
@@ -245,7 +265,12 @@ exports.removeFromCart = async (req, res) => {
 // ล้างตระกร้า
 exports.clearCart = async (req, res) => {
   try {
-    const userId = req.params.userId || "guest";
+    const userId = req.params.userId;
+
+    // ตรวจสอบว่ามี userId หรือไม่
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
 
     // ค้นหาตระกร้าก่อนลบ เพื่อคืน stock
     const cart = await Cart.findOne({ userId }).populate("items.productId");
