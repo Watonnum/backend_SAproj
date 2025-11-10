@@ -194,8 +194,17 @@ exports.updateCartItem = async (req, res) => {
     // อัพเดท stock ของสินค้า
     product.inStock -= quantityDiff; // ลด stock ตามส่วนต่าง
     await product.save();
-    cart.total = cart.items.reduce(
-      (total, item) => total + item.price * item.quantity,
+
+    // อัพเดท subtotal ของ item
+    item.subtotal = item.price * item.quantity;
+
+    // คำนวณ totalAmount และ totalItems ใหม่
+    cart.totalAmount = cart.items.reduce(
+      (total, item) => total + item.subtotal,
+      0
+    );
+    cart.totalItems = cart.items.reduce(
+      (total, item) => total + item.quantity,
       0
     );
 
@@ -245,10 +254,15 @@ exports.removeFromCart = async (req, res) => {
       (item) => item.productId.toString() !== productId
     );
 
-    // cart.total = cart.items.reduce(
-    //   (total, item) => total + item.price * item.quantity,
-    //   0
-    // );
+    // คำนวณ totalAmount และ totalItems ใหม่
+    cart.totalAmount = cart.items.reduce(
+      (total, item) => total + item.subtotal,
+      0
+    );
+    cart.totalItems = cart.items.reduce(
+      (total, item) => total + item.quantity,
+      0
+    );
 
     await cart.save();
     await cart.populate("items.productId");
