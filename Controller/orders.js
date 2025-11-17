@@ -86,12 +86,29 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-// ดึง Orders ทั้งหมด (สำหรับ admin/manager)
+// ดึง Orders ทั้งหมด (สำหรับ admin/manager/operator)
 exports.getAllOrders = async (req, res) => {
   try {
     const { status, startDate, endDate, limit = 50, page = 1 } = req.query;
 
     const query = {};
+
+    // ตรวจสอบ role และกรองข้อมูล
+    const userRole = req.user.role; // จาก authenticateToken middleware
+    const userId = req.user.id;
+
+    console.log("📋 [getAllOrders] User role:", userRole, "| User ID:", userId);
+
+    // Operator เห็นเฉพาะ order ของตัวเอง
+    if (userRole === "operator") {
+      query.userId = userId;
+      console.log("🔧 [Operator] Filtering orders for userId:", userId);
+    }
+    // Admin และ Manager เห็นทุก order
+    else if (userRole === "admin" || userRole === "manager") {
+      console.log("👑 [Admin/Manager] Showing all orders");
+      // ไม่ต้องกรอง userId
+    }
 
     // Filter by status
     if (status && status !== "all") {
@@ -118,6 +135,14 @@ exports.getAllOrders = async (req, res) => {
       .skip(skip);
 
     const total = await Order.countDocuments(query);
+
+    console.log(
+      "📦 [getAllOrders] Found",
+      orders.length,
+      "orders (total:",
+      total,
+      ")"
+    );
 
     res.status(200).json({
       orders,
@@ -187,6 +212,19 @@ exports.getOrderById = async (req, res) => {
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
+    }
+
+    // ตรวจสอบ permission สำหรับ Operator
+    const userRole = req.user.role;
+    const userId = req.user.id;
+
+    if (
+      userRole === "operator" &&
+      order.userId._id.toString() !== userId.toString()
+    ) {
+      return res.status(403).json({
+        message: "Access denied. You can only view your own orders.",
+      });
     }
 
     res.status(200).json({ order });
@@ -268,6 +306,19 @@ exports.cancelOrder = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    // ตรวจสอบ ownership สำหรับ Operator
+    const userRole = req.user.role;
+    const userId = req.user.id;
+
+    if (
+      userRole === "operator" &&
+      order.userId.toString() !== userId.toString()
+    ) {
+      return res.status(403).json({
+        message: "Access denied. You can only cancel your own orders.",
+      });
+    }
+
     // ตรวจสอบว่า order ยกเลิกได้หรือไม่
     if (order.status === "cancelled") {
       return res.status(400).json({
@@ -336,6 +387,23 @@ exports.getOrderStats = async (req, res) => {
       }
     }
 
+    // ตรวจสอบ role และกรองข้อมูล
+    const userRole = req.user.role;
+    const userId = req.user.id;
+
+    console.log(
+      "📊 [getOrderStats] User role:",
+      userRole,
+      "| User ID:",
+      userId
+    );
+
+    // Operator เห็นเฉพาะสถิติของตัวเอง
+    if (userRole === "operator") {
+      dateQuery.userId = userId;
+      console.log("🔧 [Operator] Filtering stats for userId:", userId);
+    }
+
     // นับจำนวน orders ตามสถานะ
     const statusCounts = await Order.aggregate([
       { $match: dateQuery },
@@ -370,9 +438,14 @@ exports.getOrderStats = async (req, res) => {
     // Orders วันนี้
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const todayOrders = await Order.countDocuments({
-      createdAt: { $gte: today },
-    });
+    const todayQuery = { createdAt: { $gte: today } };
+
+    // Operator เห็นเฉพาะของตัวเอง
+    if (userRole === "operator") {
+      todayQuery.userId = userId;
+    }
+
+    const todayOrders = await Order.countDocuments(todayQuery);
 
     res.status(200).json({
       statusCounts,

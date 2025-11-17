@@ -23,7 +23,7 @@ const ROLE_PERMISSIONS = {
     products: ["read"], // อ่านได้อย่างเดียว
     categories: ["read"], // อ่านได้อย่างเดียว
     cart: ["read", "create", "update", "delete"], // จัดการตะกร้าได้
-    orders: ["read", "create"], // สร้างและอ่าน order ได้
+    orders: ["read", "create", "delete"], // สร้าง อ่าน และยกเลิก order ของตัวเองได้
     pos: ["read", "create"], // ใช้ POS ได้
     settings: [], // ไม่สามารถเข้าถึง settings ได้
   },
