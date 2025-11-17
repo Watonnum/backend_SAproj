@@ -11,7 +11,7 @@ const cartSchema = mongoose.Schema(
       {
         productId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "products", // ตรวจสอบว่า Product model ใช้ชื่อ "products" หรือ "Product"
+          ref: "products",
           required: true,
         },
         productName: {

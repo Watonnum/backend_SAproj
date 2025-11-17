@@ -6,6 +6,7 @@ const {
   createUsers,
   removeUsers,
   updateUsers,
+  bulkRemoveUsers,
 } = require("../Controller/users");
 const {
   authenticateToken,
@@ -26,5 +27,8 @@ router.post("/users", requireAdmin, createUsers);
 router.put("/users/:id", requireAdmin, updateUsers);
 
 router.delete("/users/:id", requireAdmin, removeUsers);
+
+// Bulk delete route
+router.post("/users/bulk-delete", requireAdmin, bulkRemoveUsers);
 
 module.exports = router;

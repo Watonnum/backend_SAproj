@@ -1,4 +1,5 @@
 const model_Users = require("../Model/users");
+const bcrypt = require("bcrypt");
 
 // ดูตระกร้าสินค้า
 exports.getUsers = async (req, res) => {
@@ -105,19 +106,57 @@ exports.quickLogin = async (req, res) => {
 
 exports.createUsers = async (req, res) => {
   try {
-    const created = await model_Users(req.body).save();
+    const userData = { ...req.body };
+
+    // Hash password ถ้ามีการส่งมา
+    if (userData.passwordHash) {
+      const saltRounds = 10;
+      userData.passwordHash = await bcrypt.hash(
+        userData.passwordHash,
+        saltRounds
+      );
+    }
+
+    // เพิ่มวันที่สมัครและอัพเดท
+    if (!userData.regisDate) {
+      userData.regisDate = new Date();
+    }
+    if (!userData.updateDate) {
+      userData.updateDate = new Date();
+    }
+
+    // Set default role if not provided
+    if (!userData.role) {
+      userData.role = "user";
+    }
+
+    const created = await model_Users(userData).save();
     res.status(200).send(created);
   } catch (error) {
     console.log(error);
-    res.status(500).send("POST users error");
+    res.status(500).json({ message: "POST users error", error: error.message });
   }
 };
 
 exports.updateUsers = async (req, res) => {
   try {
     const id = req.params.id;
+    const userData = { ...req.body };
+
+    // Hash password ใหม่ถ้ามีการส่งมา
+    if (userData.passwordHash) {
+      const saltRounds = 10;
+      userData.passwordHash = await bcrypt.hash(
+        userData.passwordHash,
+        saltRounds
+      );
+    }
+
+    // อัพเดทวันที่แก้ไข
+    userData.updateDate = new Date();
+
     const updated = await model_Users
-      .findOneAndUpdate({ _id: id }, req.body, { new: true })
+      .findOneAndUpdate({ _id: id }, userData, { new: true })
       .exec();
     res.status(200).send(updated);
   } catch (error) {
@@ -133,6 +172,26 @@ exports.removeUsers = async (req, res) => {
     res.send(removed);
   } catch (error) {
     console.log(error);
-    res.status(500).send("DELETE categories error");
+    res.status(500).send("DELETE user error");
+  }
+};
+
+// Bulk delete users
+exports.bulkRemoveUsers = async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: "No user IDs provided" });
+    }
+
+    const result = await model_Users.deleteMany({ _id: { $in: ids } }).exec();
+    res.status(200).json({
+      message: "Users deleted successfully",
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Bulk DELETE users error");
   }
 };
