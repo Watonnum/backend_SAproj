@@ -17,18 +17,22 @@ const {
 // ทุก route ต้อง authenticate ก่อน
 router.use(authenticateToken);
 
-// เฉพาะ admin เท่านั้นที่จัดการ users ได้
-router.get("/users", requireAdmin, getUsers);
+// จัดการ users ตาม permission
+router.get("/users", checkPermission("users", "read"), getUsers);
 
-router.get("/users/:id", requireAdmin, getUsersId);
+router.get("/users/:id", checkPermission("users", "read"), getUsersId);
 
-router.post("/users", requireAdmin, createUsers);
+router.post("/users", checkPermission("users", "create"), createUsers);
 
-router.put("/users/:id", requireAdmin, updateUsers);
+router.put("/users/:id", checkPermission("users", "update"), updateUsers);
 
-router.delete("/users/:id", requireAdmin, removeUsers);
+router.delete("/users/:id", checkPermission("users", "delete"), removeUsers);
 
 // Bulk delete route
-router.post("/users/bulk-delete", requireAdmin, bulkRemoveUsers);
+router.post(
+  "/users/bulk-delete",
+  checkPermission("users", "delete"),
+  bulkRemoveUsers
+);
 
 module.exports = router;

@@ -10,7 +10,7 @@ const ROLE_PERMISSIONS = {
     settings: ["read", "create", "update", "delete"],
   },
   manager: {
-    users: [], // ไม่สามารถเข้าถึงข้อมูล user ได้
+    users: ["read"], // อ่านได้อย่างเดียว
     products: ["read", "create", "update", "delete"],
     categories: ["read", "create", "update", "delete"],
     cart: ["read", "create", "update", "delete"],
